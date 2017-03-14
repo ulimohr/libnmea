@@ -40,6 +40,7 @@ int
 parse(nmea_parser_s *parser, char *value, int val_index)
 {
 	nmea_gpgga_s *data = (nmea_gpgga_s *) parser->data;
+	int quality_raw = 0;
 
 	switch (val_index) {
 	case NMEA_GPGGA_TIME:
@@ -76,6 +77,27 @@ parse(nmea_parser_s *parser, char *value, int val_index)
 		data->longitude.cardinal = nmea_cardinal_direction_parse(value);
 		if (NMEA_CARDINAL_DIR_UNKNOWN == data->longitude.cardinal) {
 			return -1;
+		}
+		break;
+
+	case NMEA_GPGGA_QUALITY:
+		quality_raw = atoi(value);
+		switch (quality_raw) { 
+		case 0: 
+			data->quality = NQ_INVALID; 
+			break;
+		case 1: 
+			data->quality = NQ_GPS_FIX;
+			break;
+		case 2: 
+			data->quality = NQ_DGPS_FIX;
+			break;
+		case 6:
+			data->quality = NQ_ESTIMATED;
+			break;
+		default:
+			data->quality = NQ_UNKNOWN;
+			break;
 		}
 		break;
 
